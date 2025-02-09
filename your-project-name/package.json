@@ -7,10 +7,15 @@
   },
   "dependencies": {
     "@clerk/nextjs": "^6.11.1",
+    "@sanity/image-url": "^1.1.0",
+    "@sanity/vision": "^3.74.1",
     "mongodb": "^6.5.0",
     "next": "latest",
+    "next-sanity": "^9.8.54",
     "react": "^18",
-    "react-dom": "^18"
+    "react-dom": "^18",
+    "sanity": "^3.74.1",
+    "styled-components": "^6.1.15"
   },
   "devDependencies": {
     "@types/node": "^20.8.7",
