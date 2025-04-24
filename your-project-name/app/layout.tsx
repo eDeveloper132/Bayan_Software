@@ -4,6 +4,7 @@ import "@/styles/globals.css";
 import Image from "next/image";
 import logo from "../public/images/logoforbayansoftwarecut.png"
 import { ClerkProvider, SignInButton, SignedIn, SignedOut, UserButton } from '@clerk/nextjs'
+import Link from "next/link";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -22,7 +23,14 @@ export default function RootLayout({
     <html lang="en">
       <body className={inter.className}>
         <nav className="text-black h-16 flex justify-around items-center">
-          <Image src={logo} alt="Logo" width={100} height={100} />
+          <Link href={"/app-demo"}>
+            <Image src={logo} alt="Logo" width={100} height={100} />
+          </Link>
+          <div className="flex gap-10">
+            <Link href={"/app-demo"}><p className="text-black text-lg">Home</p></Link>
+            <Link href={"/app-demo/protected/course"}><p className="text-black text-lg">Videos</p></Link>
+            <Link href={"/app-demo/protected/audiocourse"}><p className="text-black text-lg">Audios</p></Link>
+          </div>
           <SignedOut>
             <SignInButton />
           </SignedOut>

@@ -1,31 +1,44 @@
-import { MongoClient } from "mongodb";
+// lib/mongodb.ts
+import mongoose from 'mongoose';
 
 if (!process.env.MONGODB_URI) {
   throw new Error('Invalid/Missing environment variable: "MONGODB_URI"');
 }
 
 const uri = process.env.MONGODB_URI;
-const options = { appName: "devrel.template.nextjs" };
 
-let client: MongoClient;
+const options = {
+  appName: 'devrel.template.nextjs',
+  // Add more Mongoose-specific options here if needed
+};
 
-if (process.env.NODE_ENV === "development") {
-  // In development mode, use a global variable so that the value
-  // is preserved across module reloads caused by HMR (Hot Module Replacement).
-  const globalWithMongo = global as typeof globalThis & {
-    _mongoClient?: MongoClient;
+interface MongooseGlobal {
+  mongoose: {
+    conn: typeof mongoose | null;
+    promise: Promise<typeof mongoose> | null;
   };
-
-  if (!globalWithMongo._mongoClient) {
-    globalWithMongo._mongoClient = new MongoClient(uri, options);
-  }
-  client = globalWithMongo._mongoClient;
-} else {
-  // In production mode, it's best to not use a global variable.
-  client = new MongoClient(uri, options);
 }
 
-// Export a module-scoped MongoClient. By doing this in a
-// separate module, the client can be shared across functions.
+// Augment globalThis to include our custom mongoose cache
+declare global {
+  // eslint-disable-next-line no-var
+  var mongoose: MongooseGlobal['mongoose'];
+}
 
-export default client;
+// Avoid reinitializing in dev hot reload
+global.mongoose ??= { conn: null, promise: null };
+
+async function connectToDatabase() {
+  if (global.mongoose.conn) {
+    return global.mongoose.conn;
+  }
+
+  if (!global.mongoose.promise) {
+    global.mongoose.promise = mongoose.connect(uri, options).then((mongoose) => mongoose);
+  }
+
+  global.mongoose.conn = await global.mongoose.promise;
+  return global.mongoose.conn;
+}
+
+export default connectToDatabase;

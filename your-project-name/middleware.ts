@@ -1,7 +1,16 @@
-import { clerkMiddleware } from "@clerk/nextjs/server";
+import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 
-export default clerkMiddleware();
+const isPublicRoute = createRouteMatcher(['/', '/app-demo']);
+
+export default clerkMiddleware(async (auth, req) => {
+  if (!isPublicRoute(req)) {
+    await auth.protect();
+  }
+});
 
 export const config = {
-  matcher: ["/(.*?)"], // This ensures the middleware does not match any routes
+  matcher: [
+    "/((?!api|_next/static|_next/image|favicon.ico).*)",
+    "/"
+  ],
 };

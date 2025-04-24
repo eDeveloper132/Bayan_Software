@@ -1,6 +1,7 @@
+// app/actions.ts
 "use server";
-
-import client from "@/lib/mongodb";
+import mongoose from 'mongoose';
+import connectToDatabase from '@/lib/mongodb';
 
 interface ConnectionTestResult {
   success: boolean;
@@ -9,15 +10,6 @@ interface ConnectionTestResult {
   error?: unknown;
 }
 
-/**
- * A generic retry function to re-attempt an asynchronous operation.
- *
- * @param operation - The async function to retry.
- * @param retries - Number of retries before failing.
- * @param delay - Delay in milliseconds between retries.
- * @returns The result of the operation if successful.
- * @throws The last encountered error if all retries fail.
- */
 async function withRetry<T>(
   operation: () => Promise<T>,
   retries = 3,
@@ -39,17 +31,11 @@ async function withRetry<T>(
 
 export async function testDatabaseConnection(): Promise<ConnectionTestResult> {
   try {
-    // Attempt to connect to MongoDB using the retry mechanism
-    const mongoClient = await withRetry(() => client.connect(), 3, 1000);
-    const db = mongoClient.db("admin");
-
-    // Use a retryable ping command to verify the connection
-    const pingResult = await withRetry(() => db.command({ ping: 1 }), 3, 1000);
+    await connectToDatabase();
+    const pingResult = await withRetry(() => mongoose.connection.db?.command({ ping: 1 }) ?? Promise.reject('DB undefined'), 3, 1000);
 
     if (pingResult.ok === 1) {
-      console.log(
-        "Pinged your deployment. You successfully connected to MongoDB!"
-      );
+      console.log("Pinged your deployment. You successfully connected to MongoDB!");
       return {
         success: true,
         timestamp: new Date(),
@@ -72,8 +58,5 @@ export async function testDatabaseConnection(): Promise<ConnectionTestResult> {
       message: "Error testing MongoDB connection",
       error,
     };
-  } finally {
-    // Optionally, if you're not leveraging connection pooling, you can close the connection:
-    await client.close();
   }
 }
