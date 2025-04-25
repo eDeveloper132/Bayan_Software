@@ -4,7 +4,7 @@ import { NextResponse } from "next/server";
 // CORS Headers
 const corsHeaders = {
   "Content-Type": "application/json",
-  "Access-Control-Allow-Origin": "*", // Restrict in production
+  "Access-Control-Allow-Origin": "https://bayan-software.vercel.app", // Restrict in production
   "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
   "Access-Control-Allow-Headers": "Content-Type",
 };
